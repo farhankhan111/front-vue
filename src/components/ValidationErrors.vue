@@ -1,21 +1,16 @@
-<script>
-export default {
-    name: "ValidationErrors",
-    props: {
-        validationErrors: {
-           // type: String,
-            required: true,
-        },
-    },
-}
-</script>
-
 <template>
-    <ul v-if="validationErrors">
-        <li v-for="validationError in validationErrors">{{validationError[0]}}</li>
+    <ul v-if="Object.keys(validationErrors).length > 0">
+        <li v-for="validationError in validationErrors" :key="validationError">{{ validationError[0] }}</li>
     </ul>
 </template>
 
-<style scoped>
+<script setup>
+import { defineProps } from 'vue';
 
-</style>
+const props = defineProps({
+    validationErrors: {
+        type: Object,
+        required: true,
+    },
+});
+</script>

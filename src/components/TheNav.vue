@@ -5,7 +5,7 @@
                 {{ user.name }}
             </li>
             <li>
-                <a href="#" @click.prevent="signOutAction"> Signout </a>
+                <a href="#" @click.prevent="signOut"> Signout </a>
             </li>
 
             <li>
@@ -34,26 +34,19 @@
     </ul>
 </template>
 
-<script>
-import {mapActions, mapGetters} from "vuex";
+<script setup>
+import {computed} from "vue";
+import {useAuthStore} from "../../stores/useAuthStore";
+import router from "@/router";
+const store = useAuthStore()
+const user = computed(() => store.authUser )
+const authenticated = computed(() => store.authenticated )
 
-export default {
-    name: "TheNav",
-    computed: {
-        ...mapGetters('auth', ['authenticated', 'user']),
-    },
-
-    methods: {
-        ...mapActions('auth', ['signOut']),
-
-        signOutAction() {
-            this.signOut().then(()=>{
-                this.$router.replace({name: 'home'})
-            })
-        }
-    }
+const signOut = () => {
+    store.signOut().then(()=>{
+        router.replace({name: 'home'})
+    })
 }
-
 </script>
 
 <style scoped>

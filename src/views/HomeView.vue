@@ -5,14 +5,6 @@
   </div>
 </template>
 
-<script>
-
+<script setup>
 import TheNav from "@/components/TheNav.vue";
-
-export default {
-  name: 'HomeView',
-  components: {
-   TheNav
-  }
-}
 </script>

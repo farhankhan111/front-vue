@@ -3,26 +3,18 @@
     <input v-model="keywords" @input="searchFeedback" />
 </template>
 
-<script>
+<script setup>
 import debounce from "debounce";
+import {ref} from "vue";
 
-export default {
-    name: "SearchFeedBackForm",
-    emits: ['searchFeedback'],
+const emit = defineEmits(['searchFeedback'])
+const keywords = ref('')
 
-    data() {
-        return {
-            keywords: '',
-        };
-    },
-
-    methods: {
-        searchFeedback: debounce(function () {
-            if(this.keywords.trim() === ''){
-                return
-            }
-            this.$emit('searchFeedback', this.keywords);
-        }, 500),
+const searchFeedback = debounce(function () {
+    if(keywords.value.trim() === ''){
+        return
     }
-}
+    emit('searchFeedback', keywords.value);
+}, 500)
+
 </script>

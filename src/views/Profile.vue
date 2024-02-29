@@ -1,7 +1,7 @@
 <template>
-    <TheNav />
+    <TheNav/>
 
-    <Notification />
+    <Notification/>
 
     <h1>Profile</h1>
     <h2>My Feedbacks</h2>
@@ -21,52 +21,39 @@
     <p v-else>{{ noFeedbackMessage }}</p>
 </template>
 
-<script>
+<script setup>
+import {onMounted, ref} from "vue";
 import axios from "axios";
 import {Bootstrap5Pagination} from 'laravel-vue-pagination';
+import Notification from "@/components/Notification.vue";
 import TheNav from "@/components/TheNav.vue";
 import FeedBackView from "@/components/FeedBackView.vue";
-import Notification from "@/components/Notification.vue";
 
-export default {
-    components: {
-        Notification,
-        TheNav,
-        Bootstrap5Pagination,
-        FeedBackView
-    },
+const feedbackList = ref([]);
+const noFeedbackMessage = ref('');
 
-    data() {
-        return {
-            feedbackList: [],
-            noFeedbackMessage: ''
-        };
-    },
+const getFeedback = async (page = 1) => {
 
-    created() {
-        this.getFeedback()
-    },
-
-    methods: {
-        getFeedback(page = 1) {
-            axios.get('user-feedbacks', {
-                params: {
-                    page
-                }
-            })
-            .then(response => {
-                if (response.data.feedbacks.data && response.data.feedbacks.data.length) {
-                    this.feedbackList = response.data.feedbacks;
-                } else {
-                    this.noFeedbackMessage = 'No Record Found'
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching feedback:', error);
-            });
-        },
-    }
+    axios.get('user-feedbacks', {
+        params: {
+            page
+        }
+    })
+    .then(response => {
+        if (response.data.data && response.data.data.length) {
+            feedbackList.value = response.data;
+        } else {
+            noFeedbackMessage.value = 'No Record Found';
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching feedback:', error);
+    });
 }
+
+onMounted(() => {
+    getFeedback();
+});
 
 </script>
 

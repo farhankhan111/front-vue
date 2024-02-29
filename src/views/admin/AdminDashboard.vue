@@ -4,11 +4,6 @@
 
 </template>
 
-<script>
-import axios from "axios";
-import {Bootstrap5Pagination} from "laravel-vue-pagination";
+<script setup>
 import AdminNav from "@/components/AdminNav.vue";
-export default {
-    components: {AdminNav},
-};
 </script>

@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Signin from "@/views/Signin.vue";
-import store from "@/store";
 import Profile from "@/views/Profile.vue";
 import CreateFeedback from "@/views/CreateFeedback.vue";
 import Feedbacks from "@/views/Feedbacks.vue";
@@ -11,6 +10,7 @@ import EditFeedback from "@/views/admin/EditFeedback.vue";
 import Comment from "@/views/admin/Comment.vue";
 import FeedBack from "@/views/admin/FeedBack.vue";
 import Signup from "@/views/Signup.vue";
+import {useAuthStore} from "../../stores/useAuthStore";
 
 const routes = [
   {
@@ -35,7 +35,8 @@ const routes = [
     component: Profile,
 
     beforeEnter: (to, from, next) => {
-      if (!store.getters['auth/authenticated']) {
+      const store = useAuthStore()
+      if (!store.authenticated) {
         next('/signin');
       } else {
         next();
@@ -46,7 +47,15 @@ const routes = [
   {
     path: '/feedbacks',
     name: 'feedbacks',
-    component: Feedbacks
+    component: Feedbacks,
+    beforeEnter: (to, from, next) => {
+      const store = useAuthStore()
+      if (!store.authenticated) {
+        next('/signin');
+      } else {
+        next();
+      }
+    },
   },
 
   {
@@ -80,7 +89,7 @@ const routes = [
     path: '/admin/dashboard',
     name: 'admin-dashboard',
     component: AdminDashboard,
-    beforeEnter: (to, from, next) => {
+    /*beforeEnter: (to, from, next) => {
       if (!store.getters['auth/authenticated']) {
         next('/signin');
       } else if(store.getters['auth/user'].user_type == 'admin') {
@@ -88,14 +97,14 @@ const routes = [
       } else {
         next('/profile');
       }
-    },
+    },*/
   },
 
   {
     path: '/admin/comments',
     name: 'admin-comments',
     component: Comment,
-    beforeEnter: (to, from, next) => {
+    /*beforeEnter: (to, from, next) => {
       if (!store.getters['auth/authenticated']) {
         next('/signin');
       } else if(store.getters['auth/user'].user_type === 'admin') {
@@ -103,7 +112,7 @@ const routes = [
       } else {
         next('/profile');
       }
-    },
+    },*/
   }
 
 ]

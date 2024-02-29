@@ -1,22 +1,17 @@
-<script>
-import {mapActions, mapGetters} from "vuex";
+<script setup>
+import {computed} from "vue";
+import {useAuthStore} from "../../stores/useAuthStore";
+import {useRouter} from "vue-router";
 
-export default {
-    name: "AdminNav",
-    computed: {
-        ...mapGetters('auth', ['authenticated', 'user']),
-    },
+const router = useRouter();
+const store = useAuthStore()
+const authenticated = computed(()=> store.authenticated )
+const user = computed(()=> store.authUser )
 
-    methods: {
-        ...mapActions('auth', ['signOut']),
-
-        signOutAction() {
-            this.signOut().then(()=>{
-                this.$router.replace({name: 'home'})
-            })
-        }
-    }
-
+const signOutAction = () => {
+    store.signOut().then(()=>{
+        router.replace({name: 'home'})
+    })
 }
 </script>
 

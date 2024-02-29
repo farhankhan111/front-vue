@@ -1,12 +1,8 @@
 <template>
     <TheNav />
-
     <Notification />
-
     <div class="main" v-if="feedback!==null">
-
         <FeedBackView :feedback="feedback" />
-
         <div>
             <button @click="voteFeedback(feedback.id,'upvote')" class="like-button">
                 <i class="fas fa-thumbs-up"></i> Like {{ feedback.upvotes }}
@@ -15,81 +11,63 @@
                 <i class="fas fa-thumbs-down"></i> Dislike {{ feedback.downvotes }}
             </button>
         </div>
-
         <CommentsSection :comments="feedback.comments" />
-
     </div>
 </template>
 
-
-<script>
+<script setup>
 import axios from "axios";
 import TheNav from "@/components/TheNav.vue";
 import CommentsSection from "@/components/CommentsSection.vue";
 import FeedBackView from "@/components/FeedBackView.vue";
 import Notification from "@/components/Notification.vue";
+import {onMounted, ref} from "vue";
+import {useRoute} from "vue-router";
 
-export default {
-    name: "FeedbackDetail",
-    components: {
-        Notification,
-        FeedBackView,
-        TheNav,
-        CommentsSection
-    },
+const route = useRoute()
+const loading = ref(true)
+const feedback = ref(null)
+const getFeedback = async () => {
+    const id = route.params.id;
 
-    data() {
-        return {
-            loading: true,
-            feedback: null,
+    try {
+        const response = await axios.get(`feedbacks/${id}`)
+        feedback.value = response.data.data;
+    } catch (error) {
+        if(error.response.status===404){
+            alert('404 not found')
         }
-    },
-
-    created() {
-
-        this.getFeedback()
-    },
-
-    methods: {
-
-        voteFeedback(id,vote_type){
-            axios.post('votes', {
-                feedback_id: id,
-                vote_type: vote_type,
-            }).then(response => {
-                alert('votes submitted successfully')
-            }).catch(error => {
-                if (error.response && error.response.status === 422) {
-                    const validationErrors = error.response.data.errors
-                    if (validationErrors
-                        && validationErrors.vote_type
-                        && validationErrors.vote_type[0] === "User already voted for this item.") {
-                        alert(validationErrors.vote_type[0]);
-                    } else {
-                        alert("Validation error occurred.");
-                    }
-                } else {
-                    console.error(error);
-                }
-            });
-        },
-
-        async getFeedback() {
-            const id = this.$route.params.id
-
-            try {
-                const response = await axios.get(`feedbacks/${id}`)
-                this.feedback = response.data.feedback;
-            } catch (error) {
-                if(error.response.status===404){
-                 alert('404 not found')
-                }
-            } finally {
-                this.loading = false;
-            }
-        },
+    } finally {
+        loading.value = false;
     }
 }
+
+const voteFeedback = (id,vote_type) => {
+    axios.post('votes', {
+        feedback_id: id,
+        vote_type: vote_type,
+    }).then(response => {
+        alert('votes submitted successfully')
+    }).catch(error => {
+        if (error.response && error.response.status === 422) {
+            const validationErrors = error.response.data.errors
+            if (validationErrors
+                && validationErrors.vote_type
+                && validationErrors.vote_type[0] === "User already voted for this item.") {
+                alert(validationErrors.vote_type[0]);
+            } else {
+                alert("Validation error occurred.");
+            }
+        } else {
+            console.error(error);
+        }
+    });
+}
+
+onMounted(() => {
+    getFeedback()
+})
+
 </script>
 
 <style>

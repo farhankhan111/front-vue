@@ -1,17 +1,18 @@
-<script>
-export default {
-    name: "FeedBackView",
-    props: {
-        feedback: {
-            type: Object,
-            required: true
-        },
-        hasAnchorTag: {
-            type: Boolean,
-            default: false,
-        },
+<script setup>
+import {computed} from "vue";
+
+const props = defineProps({
+    feedback: {
+        type: Object,
+        required: true,
     },
-}
+    hasAnchorTag: {
+        type: Boolean,
+        default: false,
+    },
+});
+
+const feedback = computed(() => props.feedback);
 </script>
 
 <template>
@@ -24,7 +25,7 @@ export default {
         <h2>{{ feedback.title }}</h2>
     </template>
     <p>{{ feedback.desc }}</p>
-    <p><strong>Author:</strong> {{ feedback.user.name }}</p>
+    <p><strong>Author:</strong> {{ feedback.user ? feedback.user.name : '' }}</p>
 
 </template>
 

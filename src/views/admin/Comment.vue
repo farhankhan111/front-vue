@@ -14,8 +14,12 @@
             <td>{{ comment.content }}</td>
             <td>{{ comment.moderate ? 'moderated' : 'pending' }}</td>
             <td>
-                <button v-if="!comment.moderate" @click="moderateComment(comment.id)">Moderate</button>
-                <span v-else="comment.moderate === true">Moderated</span>
+                <button
+                    v-if="!comment.moderate && hasPermission('moderate comment')"
+                    @click="moderateComment(comment.id)">Moderate
+                </button>
+                <span v-else-if="comment.moderate === 1">Moderated</span>
+                <span v-else>Pending</span>
             </td>
         </tr>
         </tbody>
@@ -24,57 +28,53 @@
     <CursorPagination :pagination="pagination" @loadPage="loadPage"/>
 </template>
 
-<script>
+<script setup>
 import axios from "axios";
 import AdminNav from "@/components/AdminNav.vue";
 import CursorPagination from "@/components/CursorPagination.vue";
+import {onMounted, ref} from "vue";
+import {useRolePermissionChecker} from "@/composables/rolePermissionChecker";
 
-export default {
-    name: "Comment",
-    components: {AdminNav,CursorPagination},
-    data() {
-        return {
-            comments: [],
-            pagination: {},
-        };
-    },
-    created() {
-        this.getComments();
-    },
-    methods: {
+const { hasRole, hasPermission } = useRolePermissionChecker();
+const comments = ref([])
+const pagination = ref({})
 
-        loadPage(cursor) {
-            this.getComments(cursor);
-        },
+const getComments = (cursor = null) => {
+    axios.get(`admin/comments${cursor ? `?cursor=${cursor}` : ''}`)
+        .then(response => {
+            if (response && response.data) {
+                comments.value = response.data;
+                pagination.value = {
+                    prev_cursor: response.data.meta.prev_cursor,
+                    next_cursor: response.data.meta.next_cursor,
+                };
+            }
+        }).catch(error => {
+        console.error('Error fetching comments:', error);
+    });
+}
 
-        getComments(cursor = null) {
-            axios.get(`admin/comments${cursor ? `?cursor=${cursor}` : ''}`)
-                .then(response => {
-                    if (response && response.data) {
-                        this.comments = response.data.comments;
-                        this.pagination.prev_cursor = response.data.comments.prev_cursor
-                        this.pagination.next_cursor = response.data.comments.next_cursor
-                    }
-                }).catch(error => {
-                console.error('Error fetching comments:', error);
-            });
-        },
+const moderateComment = (commentId) => {
+    axios.put(`admin/comments/${commentId}/moderate`)
+        .then(response => {
+            const moderatedComment = comments.value.data.find(comment => comment.id === commentId);
+            if (moderatedComment) {
+                moderatedComment.moderate = 1;
+                alert(response.data.metadata.message)
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
 
-        moderateComment(commentId) {
-            axios.put(`admin/comments/${commentId}/moderate`)
-                .then(response => {
-                    const moderatedComment = this.comments.data.find(comment => comment.id === commentId);
-                    if (moderatedComment) {
-                        moderatedComment.moderate = 1;
-                        alert(response.data.message)
-                    }
-                })
-                .catch(error => {
-                    console.error(`Error`);
-                });
-        },
-    },
-};
+const loadPage = (cursor) => {
+    getComments(cursor);
+}
+
+onMounted(() => {
+    getComments();
+});
 
 </script>
 

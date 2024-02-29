@@ -1,56 +1,51 @@
-<script>
+<script setup>
 import axios from "axios";
 import AdminNav from "@/components/AdminNav.vue";
 import CursorPagination from "@/components/CursorPagination.vue";
+import {onMounted, ref} from "vue";
+import router from "@/router";
 
-export default {
-    name: "FeedBack",
-    components: {CursorPagination, AdminNav},
-    data() {
-        return {
-            feedbacks: [],
-            pagination: {},
-        };
-    },
-    created() {
-        this.getFeedback();
-    },
-    methods: {
+const feedbacks = ref([]);
+const pagination = ref({});
 
-        loadPage(cursor) {
-            this.getFeedback(cursor);
-        },
+const getFeedback = async (cursor = null) => {
+    try {
+        const response = await axios.get(`admin/feedbacks${cursor ? `?cursor=${cursor}` : ''}`);
 
-        getFeedback(cursor = null) {
-            axios.get(`admin/feedbacks${cursor ? `?cursor=${cursor}` : ''}`)
-                .then(response => {
-                    if (response && response.data) {
-                        this.feedbacks = response.data.feedbacks;
-                        this.pagination.prev_cursor = response.data.feedbacks.prev_cursor
-                        this.pagination.next_cursor = response.data.feedbacks.next_cursor
-                    }
-                }).catch(error => {
-                console.error('Error fetching feedback:', error);
-            });
-        },
-
-        editFeedback(feedbackId) {
-            this.$router.push({name: 'feedback-edit', params: {id: feedbackId}});
-        },
-
-        deleteFeedback(feedbackId) {
-            axios.delete(`admin/feedbacks/${feedbackId}`)
-                .then(response => {
-                    //this.feedbacks.data = this.feedbacks.data.filter(feedback => feedback.id !== feedbackId);
-                    alert(response.data.message)
-                    this.getFeedback();
-                })
-                .catch(error => {
-                    console.error(`Error deleting feedback`);
-                });
+        if (response.data) {
+            feedbacks.value = response.data;
+            pagination.value = {
+                prev_cursor: response.data.meta.prev_cursor,
+                next_cursor: response.data.meta.next_cursor,
+            };
         }
-    },
-}
+    } catch (error) {
+        console.error('Error fetching feedback:', error);
+    }
+};
+
+const loadPage = (cursor) => {
+    getFeedback(cursor);
+};
+
+const editFeedback = (feedbackId) => {
+    router.push({ name: 'feedback-edit', params: { id: feedbackId } });
+};
+
+const deleteFeedback = async (feedbackId) => {
+    try {
+        await axios.delete(`admin/feedbacks/${feedbackId}`);
+        alert('Feedback deleted successfully');
+        getFeedback();
+    } catch (error) {
+        console.error('Error deleting feedback:', error);
+    }
+};
+
+onMounted(() => {
+    getFeedback();
+});
+
 </script>
 
 <template>
@@ -58,7 +53,7 @@ export default {
 
     <div>
         <h2>Admin Dashboard - Feedback Management</h2>
-        <table class="table">
+        <table class="table" v-if="feedbacks.data && feedbacks.data.length">
             <thead>
             <tr>
                 <th scope="col">Title</th>
@@ -77,9 +72,10 @@ export default {
             </tr>
             </tbody>
         </table>
+        <div v-else>No Data</div>
     </div>
 
-    <CursorPagination :pagination="pagination" @loadPage="loadPage" />
+    <CursorPagination :pagination="pagination" @load-page="loadPage" />
 
 </template>
 

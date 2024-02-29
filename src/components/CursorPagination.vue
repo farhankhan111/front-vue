@@ -3,27 +3,18 @@
     <button class="btn btn-primary" v-if="pagination.next_cursor" @click="loadPage(pagination.next_cursor)">Next</button>
 </template>
 
+<script setup>
+import { defineProps } from 'vue';
+const emits = defineEmits(['loadPage']);
 
-<script>
-export default {
-    name: "CursorPagination",
-    props: {
-        pagination:{type: Object },
+const props = defineProps({
+    pagination: {
+        type: Object,
+        required: true,
     },
-    emits:['loadPage'],
+});
 
-    methods:{
-        loadPage(cursor){
-            this.$emit('loadPage', cursor);
-        }
-    }
-}
+const loadPage = (cursor) => {
+    emits('loadPage', cursor);
+};
 </script>
-
-<style scoped>
-
-button{
-
-    margin-right: 3px;
-}
-</style>

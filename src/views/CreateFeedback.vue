@@ -1,9 +1,10 @@
 <template>
     <TheNav/>
     <Notification />
-    <ValidationErrors :validationErrors="validationErrors"/>
 
     <form @submit.prevent="submitFeedback">
+        <ValidationErrors :validationErrors="validationErrors"/>
+
         <label for="title">Title:</label>
         <input v-model="form.title" id="title" type="text">
 
@@ -21,50 +22,34 @@
     </form>
 </template>
 
-
-<script>
+<script setup>
 import axios from "axios";
 import TheNav from "@/components/TheNav.vue";
 import ValidationErrors from "@/components/ValidationErrors.vue";
 import Notification from "@/components/Notification.vue";
+import {ref} from "vue";
+import router from "@/router";
 
+const form = ref({
+    title: '',
+    type: 'bug',
+    desc: '',
+})
+const validationErrors = ref([])
 
-export default {
-    name: "CreateFeedback",
-    components:{
-        Notification,
-        TheNav,
-        ValidationErrors
-
-    },
-
-    data() {
-        return {
-            form:{
-                title: '',
-                type: 'bug',
-                desc: '',
-            },
-            validationErrors: []
-        };
-    },
-
-    methods: {
-        submitFeedback() {
-            axios.post('feedbacks', this.form)
-                .then(response => {
-                    this.validationErrors = []
-                    this.$router.push('/feedbacks')
-                })
-                .catch(error => {
-                if (error.response && error.response.status === 422) {
-                    this.validationErrors = error.response.data.errors;
-                } else {
-                    console.error(error);
-                }
-            });
-        },
-    }
-
+const submitFeedback = () => {
+    axios.post('feedbacks', form.value)
+        .then(response => {
+            validationErrors.value = []
+            router.push('/feedbacks')
+        })
+        .catch(error => {
+            if (error.response && error.response.status === 422) {
+                validationErrors.value = error.response.data.errors;
+            } else {
+                console.error(error);
+            }
+        });
 }
+
 </script>

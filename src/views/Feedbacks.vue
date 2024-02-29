@@ -29,7 +29,7 @@
 
 </template>
 
-<script>
+<script setup>
 import '@fortawesome/fontawesome-free/css/all.css';
 import axios from "axios";
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
@@ -37,46 +37,33 @@ import TheNav from "@/components/TheNav.vue";
 import FeedBackView from "@/components/FeedBackView.vue";
 import SearchFeedBackForm from "@/components/SearchFeedBackForm.vue";
 import Notification from "@/components/Notification.vue";
+import {onMounted, ref} from "vue";
 
-export default {
-    components: {
-        Notification,
-        TheNav,
-        Bootstrap5Pagination,
-        FeedBackView,
-        SearchFeedBackForm
-    },
+const keywords = ref('');
+const feedbackList = ref([]);
 
-    data() {
-        return {
-            keywords: '',
-            feedbackList: []
-        };
-    },
-
-    created() {
-        this.getFeedback()
-    },
-    methods: {
-        searchFeedback(keywords){
-            this.keywords = keywords
-            this.getFeedback();
+const getFeedback = (page = 1) => {
+    axios.get('feedbacks',{
+        params: {
+            page,
+            keywords: keywords.value
         },
+    }).then(response => {
+        feedbackList.value = response.data && response.data.data.length ? response.data : '';
 
-        getFeedback(page = 1) {
-            axios.get('feedbacks',{
-                params: {
-                    page,
-                    keywords: this.keywords
-                },
-            }).then(response => {
-                this.feedbackList = response.data.feedbacks;
-            }).catch(error => {
-                console.error('Error fetching feedback:', error);
-            });
-        },
-    }
+    }).catch(error => {
+        console.error('Error fetching feedback:', error);
+    });
 }
+
+const searchFeedback = (query) => {
+    keywords.value = query;
+    getFeedback();
+};
+
+onMounted(()=>{
+    getFeedback();
+})
 </script>
 
 <style scoped>
