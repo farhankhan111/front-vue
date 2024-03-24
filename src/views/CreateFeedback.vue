@@ -1,6 +1,6 @@
 <template>
     <TheNav/>
-    <Notification />
+<!--    <Notification />-->
 
     <form @submit.prevent="submitFeedback">
         <ValidationErrors :validationErrors="validationErrors"/>
@@ -18,6 +18,9 @@
         <label for="description">Description:</label>
         <textarea v-model="form.desc" id="description" rows="4"></textarea>
 
+        <strong>File:</strong>
+        <input type="file" class="form-control" ref="fileInput">
+
         <button type="submit">Submit Feedback</button>
     </form>
 </template>
@@ -27,21 +30,41 @@ import axios from "axios";
 import TheNav from "@/components/TheNav.vue";
 import ValidationErrors from "@/components/ValidationErrors.vue";
 import Notification from "@/components/Notification.vue";
-import {ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import router from "@/router";
+import Echo from "laravel-echo";
+
+
+onUnmounted(() => {
+    alert('close')
+});
+
+
 
 const form = ref({
     title: '',
     type: 'bug',
     desc: '',
+    //file: '',
 })
+
+const fileInput = ref(null);
+
 const validationErrors = ref([])
 
 const submitFeedback = () => {
-    axios.post('feedbacks', form.value)
+
+    const formData = new FormData();
+    formData.append('title', form.value.title);
+    formData.append('type', form.value.type);
+    formData.append('desc', form.value.desc);
+    formData.append('file', fileInput.value.files[0]);
+
+
+    axios.post('feedbacks', formData)
         .then(response => {
             validationErrors.value = []
-            router.push('/feedbacks')
+            //router.push('/feedbacks')
         })
         .catch(error => {
             if (error.response && error.response.status === 422) {
@@ -51,5 +74,18 @@ const submitFeedback = () => {
             }
         });
 }
+
+onMounted(() => {
+
+
+
+    /*window.Echo.channel('farhan')
+        .listen('TestEvent', (e) => {
+            alert('ok')
+        });
+*/
+})
+
+
 
 </script>

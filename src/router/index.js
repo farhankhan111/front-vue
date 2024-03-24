@@ -11,8 +11,15 @@ import Comment from "@/views/admin/Comment.vue";
 import FeedBack from "@/views/admin/FeedBack.vue";
 import Signup from "@/views/Signup.vue";
 import {useAuthStore} from "../../stores/useAuthStore";
+import Csv from "@/views/Csv.vue";
 
 const routes = [
+
+  {
+    path: '/upload-csv',
+    name: 'csv',
+    component: Csv
+  },
   {
     path: '/',
     name: 'home',

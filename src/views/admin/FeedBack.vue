@@ -4,9 +4,11 @@ import AdminNav from "@/components/AdminNav.vue";
 import CursorPagination from "@/components/CursorPagination.vue";
 import {onMounted, ref} from "vue";
 import router from "@/router";
+import {useRolePermissionChecker} from "@/composables/rolePermissionChecker";
 
 const feedbacks = ref([]);
 const pagination = ref({});
+const { hasRole } = useRolePermissionChecker();
 
 const getFeedback = async (cursor = null) => {
     try {
@@ -67,7 +69,11 @@ onMounted(() => {
                 <td>{{ feedback.desc }}</td>
                 <td>
                     <button class="btn btn-primary" @click="editFeedback(feedback.id)">Edit</button>
-                    <button class="btn btn-danger" @click="deleteFeedback(feedback.id)">Delete</button>
+                    <button
+                        v-if="hasRole('admin')"
+                        class="btn btn-danger"
+                        @click="deleteFeedback(feedback.id)">Delete
+                    </button>
                 </td>
             </tr>
             </tbody>

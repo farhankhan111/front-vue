@@ -1,13 +1,29 @@
 <template>
-    <TheNav />
+    <TheNav/>
 
-    <Notification />
+    <div>
+        <select class="" v-model="filters.userId">
+            <option value="">Select User ID</option>
+            <option v-for="user in userIds" :value="user.id" :key="user.id">{{ user.name }}</option>
+        </select>
+
+        <select class="" v-model="filters.type">
+            <option value="">Select Type</option>
+            <option v-for="type in types" :value="type.type" :key="type.type">{{ type.type }}</option>
+        </select>
+        <button @click="applyFilter">Filter</button>
+
+    </div>
+
+    <!--
+        <Notification />
+    -->
 
     <div>
         <h2>Feedbacks</h2>
         <router-link class="btn btn-primary mb-3 mt-3" to="/create-feedback" tag="button">Create Feedback</router-link>
 
-        <SearchFeedBackForm @searchFeedback="searchFeedback" />
+        <SearchFeedBackForm @searchFeedback="searchFeedback"/>
 
         <ul class="blog-list">
             <li v-for="feedback in feedbackList.data" :key="feedback.id" class="blog-item">
@@ -30,39 +46,66 @@
 </template>
 
 <script setup>
-import '@fortawesome/fontawesome-free/css/all.css';
-import axios from "axios";
-import { Bootstrap5Pagination } from 'laravel-vue-pagination';
+import '@fortawesome/fontawesome-free/css/all.css'
+import axios from "axios"
+import {Bootstrap5Pagination} from 'laravel-vue-pagination';
 import TheNav from "@/components/TheNav.vue";
 import FeedBackView from "@/components/FeedBackView.vue";
 import SearchFeedBackForm from "@/components/SearchFeedBackForm.vue";
 import Notification from "@/components/Notification.vue";
-import {onMounted, ref} from "vue";
+import {onMounted, ref} from "vue"
+import router from "@/router"
 
-const keywords = ref('');
-const feedbackList = ref([]);
+const keywords = ref('')
+const feedbackList = ref([])
+
+const userIds = ref([
+    {id: 43, name: "user"},
+    {id: 44, name: "admin"}
+]);
+
+const types = ref([
+    {type: "bug"},
+    {type: "improvement"}
+]);
+
+const filters = ref({
+    userId: '',
+    type: ''
+});
+
+const applyFilter = () => {
+    const queryParams = {};
+    for (const key in filters.value) {
+        if (filters.value[key] !== '') {
+            queryParams[key] = filters.value[key]
+        }
+    }
+    router.push({query: queryParams}).then(() => getFeedback())
+};
 
 const getFeedback = (page = 1) => {
-    axios.get('feedbacks',{
-        params: {
-            page,
-            keywords: keywords.value
-        },
-    }).then(response => {
-        feedbackList.value = response.data && response.data.data.length ? response.data : '';
+    const queryParams = router.currentRoute.value.query
+    if (keywords.value) {
+        queryParams.keywords = keywords.value
+    }
+    queryParams.page = page
 
-    }).catch(error => {
-        console.error('Error fetching feedback:', error);
+    axios.get('feedbacks', {params: queryParams})
+        .then(response => {
+            feedbackList.value = response.data && response.data.data.length ? response.data : ''
+        }).catch(error => {
+        console.error('Error fetching feedback:', error)
     });
 }
 
 const searchFeedback = (query) => {
-    keywords.value = query;
-    getFeedback();
+    keywords.value = query
+    getFeedback()
 };
 
-onMounted(()=>{
-    getFeedback();
+onMounted(() => {
+    getFeedback()
 })
 </script>
 

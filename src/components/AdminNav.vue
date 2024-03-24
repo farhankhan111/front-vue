@@ -2,6 +2,7 @@
 import {computed} from "vue";
 import {useAuthStore} from "../../stores/useAuthStore";
 import {useRouter} from "vue-router";
+import axios from "axios";
 
 const router = useRouter();
 const store = useAuthStore()
@@ -13,6 +14,21 @@ const signOutAction = () => {
         router.replace({name: 'home'})
     })
 }
+
+const broadcast = () => {
+    axios.get(`admin/fire-broadcast`)
+        .then(response => {
+            /*const moderatedComment = comments.value.data.find(comment => comment.id === commentId);
+            if (moderatedComment) {
+                moderatedComment.moderate = 1;
+                alert(response.data.metadata.message)
+            }*/
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
+
 </script>
 
 <template>
@@ -33,6 +49,10 @@ const signOutAction = () => {
 
             <li>
                 <router-link to="/admin/feedbacks">FeedBacks</router-link>
+            </li>
+
+            <li>
+                <button class="btn btn-primary" @click="broadcast">Broadcast</button>
             </li>
         </ul>
     </template>

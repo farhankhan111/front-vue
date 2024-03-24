@@ -35,7 +35,7 @@ import CursorPagination from "@/components/CursorPagination.vue";
 import {onMounted, ref} from "vue";
 import {useRolePermissionChecker} from "@/composables/rolePermissionChecker";
 
-const { hasRole, hasPermission } = useRolePermissionChecker();
+const {hasPermission } = useRolePermissionChecker();
 const comments = ref([])
 const pagination = ref({})
 

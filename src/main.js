@@ -18,7 +18,7 @@ app.use(createPinia())
 
 const store = useAuthStore()
 
-window.Pusher = Pusher;
+/*window.Pusher = Pusher;
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: 'local',
@@ -33,7 +33,7 @@ window.Echo = new Echo({
             Authorization: 'Bearer ' + localStorage.getItem("token"),
         },
     },
-});
+});*/
 
 store.getUser(localStorage.getItem("token")).then(()=>{
     app.use(router)
