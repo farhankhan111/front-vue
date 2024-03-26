@@ -1,21 +1,29 @@
 <template>
     <TheNav/>
     <ValidationErrors :validationErrors="validationErrors"/>
-    <form @submit.prevent="submit">
+    <Form @submit="submit">
         <label for="username">Email:</label>
-        <input type="text" id="email" name="email" v-model="form.email">
+        <Field type="text" name="email" v-model="form.email" :rules="[required,validateEmail]" />
+        <ErrorMessage name="email" />
+
         <label for="username">Pass:</label>
-        <input type="text" id="password" name="password" v-model="form.password">
-        <button type="submit">Submit</button>
-    </form>
+        <Field type="text" name="password" v-model="form.password" :rules="required" />
+        <ErrorMessage name="password" />
+        <div>
+            <button type="submit">Submit</button>
+        </div>
+    </Form>
 </template>
 
 <script setup>
+
+import {Field,Form,ErrorMessage} from "vee-validate";
 import TheNav from "@/components/TheNav.vue";
 import ValidationErrors from "@/components/ValidationErrors.vue";
 import {computed, onMounted, ref} from "vue";
 import {useRouter} from "vue-router";
 import {useAuthStore} from "../../stores/useAuthStore";
+
 const store = useAuthStore()
 const router = useRouter();
 const validationErrors = ref([]);
@@ -25,6 +33,13 @@ const form = ref({
     password: '',
 });
 
+const required = (value) => {
+    return !value ? 'This field is required' : true;
+}
+const validateEmail = (value) => {
+    const regex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
+    return !regex.test(value) ? 'This field must be a valid email' : true;
+}
 const submit = () => {
     store.signIn(form.value)
         .then(() => {
